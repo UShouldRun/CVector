@@ -37,9 +37,9 @@
  * vector_init(type, capacity, value)                // malloc version
  * vector_init(type, capacity, value, &arena)        // arena version
  * vector_init(type, capacity, value, &pool)         // pool version
- * vector_reserve(type, capacity)                // malloc version
- * vector_reserve(type, capacity, &arena)        // arena version
- * vector_reserve(type, capacity, &pool)         // pool version
+ * vector_reserve(type, capacity)                    // malloc version
+ * vector_reserve(type, capacity, &arena)            // arena version
+ * vector_reserve(type, capacity, &pool)             // pool version
  * vector_free(type, &vec)                           // malloc version
  * vector_free(type, &vec, &pool)                    // pool version (arena needs no free)
  * 
@@ -164,7 +164,7 @@ DEFINE_VECTOR_CMP(char)
   /* Initialization */ \
   /* --------------------------------------------------------------------- */ \
   \
-  vector(type) vector_##type##_init(const u64 capacity, const type value) { \
+  static inline vector(type) vector_##type##_init(const u64 capacity, const type value) { \
     vector(type) v = {0}; \
     v.capacity = capacity; \
     v.s_vector = capacity; \
@@ -178,7 +178,7 @@ DEFINE_VECTOR_CMP(char)
     return v; \
   } \
   \
-  vector(type) vector_##type##_init_arena(Arena* arena, const u64 capacity, const type value) { \
+  static inline vector(type) vector_##type##_init_arena(Arena* arena, const u64 capacity, const type value) { \
     vector(type) v = {0}; \
     v.capacity = capacity; \
     v.s_vector = capacity; \
@@ -192,7 +192,7 @@ DEFINE_VECTOR_CMP(char)
     return v; \
   } \
   \
-  vector(type) vector_##type##_init_pool(Pool* pool, const u64 capacity, const type value) { \
+  static inline vector(type) vector_##type##_init_pool(Pool* pool, const u64 capacity, const type value) { \
     vector(type) v = {0}; \
     v.capacity = capacity; \
     v.s_vector = capacity; \
@@ -206,7 +206,7 @@ DEFINE_VECTOR_CMP(char)
     return v; \
   } \
   \
-  vector(type) vector_##type##_reserve(const u64 capacity) { \
+  static inline vector(type) vector_##type##_reserve(const u64 capacity) { \
     vector(type) v = {0}; \
     v.capacity = capacity; \
     v.s_vector = 0; \
@@ -217,7 +217,7 @@ DEFINE_VECTOR_CMP(char)
     return v; \
   } \
   \
-  vector(type) vector_##type##_reserve_arena(Arena* arena, const u64 capacity) { \
+  static inline vector(type) vector_##type##_reserve_arena(Arena* arena, const u64 capacity) { \
     vector(type) v = {0}; \
     v.capacity = capacity; \
     v.s_vector = 0; \
@@ -228,7 +228,7 @@ DEFINE_VECTOR_CMP(char)
     return v; \
   } \
   \
-  vector(type) vector_##type##_reserve_pool(Pool* pool, const u64 capacity) { \
+  static inline vector(type) vector_##type##_reserve_pool(Pool* pool, const u64 capacity) { \
     vector(type) v = {0}; \
     v.capacity = capacity; \
     v.s_vector = 0; \
@@ -242,7 +242,7 @@ DEFINE_VECTOR_CMP(char)
   /* Memory Management */ \
   /* --------------------------------------------------------------------- */ \
   \
-  void vector_##type##_resize(vector(type)* vec, const u64 capacity) { \
+  static inline void vector_##type##_resize(vector(type)* vec, const u64 capacity) { \
     assert(vec != NULL); \
     if (capacity == vec->capacity) \
       return; \
@@ -257,7 +257,7 @@ DEFINE_VECTOR_CMP(char)
       vec->s_vector = capacity; \
   } \
   \
-  void vector_##type##_resize_arena(vector(type)* vec, Arena* arena, const u64 capacity) { \
+  static inline void vector_##type##_resize_arena(vector(type)* vec, Arena* arena, const u64 capacity) { \
     assert(vec != NULL); \
     if (capacity == vec->capacity) \
       return; \
@@ -272,7 +272,7 @@ DEFINE_VECTOR_CMP(char)
       vec->s_vector = capacity; \
   } \
   \
-  void vector_##type##_resize_pool(vector(type)* vec, Pool* pool, const u64 capacity) { \
+  static inline void vector_##type##_resize_pool(vector(type)* vec, Pool* pool, const u64 capacity) { \
     assert(vec != NULL); \
     if (capacity == vec->capacity) \
       return; \
@@ -287,12 +287,12 @@ DEFINE_VECTOR_CMP(char)
       vec->s_vector = capacity; \
   } \
   \
-  void vector_##type##_clear(vector(type)* vec) { \
+  static inline void vector_##type##_clear(vector(type)* vec) { \
     assert(vec != NULL); \
     vec->s_vector = 0; \
   } \
   \
-  void vector_##type##_shrink_to_fit(vector(type)* vec) { \
+  static inline void vector_##type##_shrink_to_fit(vector(type)* vec) { \
     assert(vec != NULL); \
     if (vec->s_vector == vec->capacity) \
       return; \
@@ -311,7 +311,7 @@ DEFINE_VECTOR_CMP(char)
     vec->capacity = vec->s_vector; \
   } \
   \
-  void vector_##type##_shrink_to_fit_arena(vector(type)* vec, Arena* arena) { \
+  static inline void vector_##type##_shrink_to_fit_arena(vector(type)* vec, Arena* arena) { \
     assert(vec != NULL); \
     if (vec->s_vector == vec->capacity) \
       return; \
@@ -329,7 +329,7 @@ DEFINE_VECTOR_CMP(char)
     vec->capacity = vec->s_vector; \
   } \
   \
-  void vector_##type##_shrink_to_fit_pool(vector(type)* vec, Pool* pool) { \
+  static inline void vector_##type##_shrink_to_fit_pool(vector(type)* vec, Pool* pool) { \
     assert(vec != NULL); \
     if (vec->s_vector == vec->capacity) \
       return; \
@@ -426,7 +426,7 @@ DEFINE_VECTOR_CMP(char)
     vec->array[vec->s_vector++] = value; \
   } \
   \
-  void vector_##type##_insert(vector(type)* vec, const u64 index, const type value) { \
+  static inline void vector_##type##_insert(vector(type)* vec, const u64 index, const type value) { \
     assert(vec != NULL); \
     assert(index <= vec->s_vector); \
     \
@@ -444,7 +444,7 @@ DEFINE_VECTOR_CMP(char)
     vec->s_vector++; \
   } \
   \
-  void vector_##type##_insert_arena(vector(type)* vec, Arena* arena, const u64 index, const type value) { \
+  static inline void vector_##type##_insert_arena(vector(type)* vec, Arena* arena, const u64 index, const type value) { \
     assert(vec != NULL); \
     assert(index <= vec->s_vector); \
     \
@@ -462,7 +462,7 @@ DEFINE_VECTOR_CMP(char)
     vec->s_vector++; \
   } \
   \
-  void vector_##type##_insert_pool(vector(type)* vec, Pool* pool, const u64 index, const type value) { \
+  static inline void vector_##type##_insert_pool(vector(type)* vec, Pool* pool, const u64 index, const type value) { \
     assert(vec != NULL); \
     assert(index <= vec->s_vector); \
     \
@@ -480,7 +480,7 @@ DEFINE_VECTOR_CMP(char)
     vec->s_vector++; \
   } \
   \
-  void vector_##type##_remove(vector(type)* vec, const u64 index) { \
+  static inline void vector_##type##_remove(vector(type)* vec, const u64 index) { \
     assert(vec != NULL); \
     assert(index < vec->s_vector); \
     memmove( \
@@ -500,7 +500,7 @@ DEFINE_VECTOR_CMP(char)
   /* Bulk Operations */ \
   /* --------------------------------------------------------------------- */ \
   \
-  void vector_##type##_extend(vector(type)* vec, const vector(type)* other) { \
+  static inline void vector_##type##_extend(vector(type)* vec, const vector(type)* other) { \
     assert(vec != NULL); \
     assert(other != NULL); \
     \
@@ -520,7 +520,7 @@ DEFINE_VECTOR_CMP(char)
     vec->s_vector = new_size; \
   } \
   \
-  void vector_##type##_extend_arena(vector(type)* vec, Arena* arena, const vector(type)* other) { \
+  static inline void vector_##type##_extend_arena(vector(type)* vec, Arena* arena, const vector(type)* other) { \
     assert(vec != NULL); \
     assert(other != NULL); \
     \
@@ -540,7 +540,7 @@ DEFINE_VECTOR_CMP(char)
     vec->s_vector = new_size; \
   } \
   \
-  void vector_##type##_extend_pool(vector(type)* vec, Pool* pool, const vector(type)* other) { \
+  static inline void vector_##type##_extend_pool(vector(type)* vec, Pool* pool, const vector(type)* other) { \
     assert(vec != NULL); \
     assert(other != NULL); \
     \
@@ -560,13 +560,13 @@ DEFINE_VECTOR_CMP(char)
     vec->s_vector = new_size; \
   } \
   \
-  void vector_##type##_fill(vector(type)* vec, const type value) { \
+  static inline void vector_##type##_fill(vector(type)* vec, const type value) { \
     assert(vec != NULL); \
     for (u64 i = 0; i < vec->s_vector; i++) \
       vec->array[i] = value; \
   } \
   \
-  void vector_##type##_reverse(vector(type)* vec) { \
+  static inline void vector_##type##_reverse(vector(type)* vec) { \
     assert(vec != NULL); \
     \
     if (vec->s_vector <= 1) \
@@ -585,7 +585,7 @@ DEFINE_VECTOR_CMP(char)
     } \
   } \
   \
-  void vector_##type##_sort(vector(type)* vec, int (*compare)(const type*, const type*)) { \
+  static inline void vector_##type##_sort(vector(type)* vec, int (*compare)(const type*, const type*)) { \
     assert(vec != NULL); \
     assert(compare != NULL); \
     if (vec->s_vector <= 1) \
@@ -597,7 +597,7 @@ DEFINE_VECTOR_CMP(char)
   /* Search */ \
   /* --------------------------------------------------------------------- */ \
   \
-  i64 vector_##type##_find(const vector(type)* vec, const type value) { \
+  static i64 vector_##type##_find(const vector(type)* vec, const type value) { \
     assert(vec != NULL); \
     for (u64 i = 0; i < vec->s_vector; i++) \
       if (memcmp(&vec->array[i], &value, sizeof(type)) == 0) \
@@ -631,7 +631,7 @@ DEFINE_VECTOR_CMP(char)
     vec->array[j] = temp; \
   } \
   \
-  vector(type) vector_##type##_clone(const vector(type)* vec) { \
+  static inline vector(type) vector_##type##_clone(const vector(type)* vec) { \
     assert(vec != NULL); \
     \
     vector(type) new_vec = {0}; \
@@ -648,7 +648,7 @@ DEFINE_VECTOR_CMP(char)
     return new_vec; \
   } \
   \
-  vector(type) vector_##type##_clone_arena(const vector(type)* vec, Arena* arena) { \
+  static inline vector(type) vector_##type##_clone_arena(const vector(type)* vec, Arena* arena) { \
     assert(vec != NULL); \
     \
     vector(type) new_vec = {0}; \
@@ -665,7 +665,7 @@ DEFINE_VECTOR_CMP(char)
     return new_vec; \
   } \
   \
-  vector(type) vector_##type##_clone_pool(const vector(type)* vec, Pool* pool) { \
+  static inline vector(type) vector_##type##_clone_pool(const vector(type)* vec, Pool* pool) { \
     assert(vec != NULL); \
     \
     vector(type) new_vec = {0}; \
